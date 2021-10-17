@@ -1,0 +1,84 @@
+drawer:
+  gui:
+    information: '[{"text":"Menu d\u2032"},{"text":"upgrade","color":"aqua"},{"text":" du "},{"text":"Drawer","color":"gold"}]'
+
+upgrade:
+  storage:
+    tier0:
+      material: "BROWN_SHULKER_BOX"
+      param1: "32"
+      color: "#6C4227"
+    tier1:
+      material: "WHITE_SHULKER_BOX"
+      param1: "64"
+      color: "#CECECE"
+    tier2:
+      material: "YELLOW_SHULKER_BOX"
+      param1: "128"
+      color: "#F1EA5B"
+    tier3:
+      material: "LIGHT_BLUE_SHULKER_BOX"
+      param1: "256"
+      color: "#9AEEDD"
+    tier4:
+      material: "GRAY_SHULKER_BOX"
+      param1: "512"
+      color: "#565456"
+    displayName: '{"text":"Storage upgrade","color":"%color%"}'
+    lore:
+      - '{"text":"--- upgrade tier %tier% ---","color":"dark_gray"}'
+      - '{"text":""}'
+      - '{"text":"cette upgrade vous permets"}'
+      - '{"text":"de mettre %param1% stacks d\u2032un même item"}'
+    glowing: false
+  autosell:
+    displayName: '{"text":"AutoSell upgrade","color":"%color%"}'
+    lore:
+      - '{"text":"--- upgrade tier %tier% ---","color":"dark_gray"}'
+      - '{"text":""}'
+      - '{"text":"cette upgrade vous permets"}'
+      - '{"text":"de vendre automatiquement"}'
+      - '{"text":"%param1% stacks toute les 10s"}'
+    glowing: true
+    tier0:
+      material: "COAL"
+      param1: "0"
+      color: "#454545"
+    tier1:
+      material: "IRON_INGOT"
+      param1: "4"
+      color: "#CECECE"
+    tier2:
+      material: "GOLD_INGOT"
+      param1: "8"
+      color: "#F1EA5B"
+    tier3:
+      material: "DIAMOND"
+      param1: "16"
+      color: "#9AEEDD"
+    tier4:
+      material: "EMERALD"
+      param1: "32"
+      color: "#3FE87E"
+  collection:
+    displayName: '{"text":"Collection upgrade","color":"%color%"}'
+    lore:
+      - '{"text":"--- upgrade tier %tier% ---","color":"dark_gray"}'
+      - '{"text":""}'
+      - '{"text":"cette upgrade vous permets"}'
+      - '{"text":"de collecter automatiquement"}'
+      - '{"text":"tout les items du meme type"}'
+      - '{"text":"que l\u2032item stocké sur %param1% chunks"}'
+    glowing: true
+    tier0:
+      material: "COMPOSTER"
+      param1: "0"
+      color: "#6C4227"
+    tier1:
+      material: "HOPPER"
+      param1: "1x1"
+      color: "#CECECE"
+    tier2:
+      material: "HOPPER_MINECART"
+      param1: "3x3"
+      color: "#F1EA5B"
