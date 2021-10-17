@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Container;
 import org.bukkit.block.TileState;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.EntityType;
@@ -140,7 +141,7 @@ public class Drawer {
 
     public ItemStack getDisplayItemStack() {
 
-        ItemStack displayItem = this.item;
+        ItemStack displayItem = this.item.clone();
 
         if (displayItem.getType().equals(Material.AIR)) {
             displayItem.setType(Material.BARRIER);
@@ -237,6 +238,12 @@ public class Drawer {
 
         return drawerGui;
 
+    }
+
+    public void putItemInBarrelInv() {
+        Inventory drawerInv = ((Container) this.blockDrawer.getState()).getInventory();
+        drawerInv.clear();
+        drawerInv.addItem(this.item.asQuantity(this.quantity < 864 ? this.quantity : 864));
     }
 
     public Block getBlockDrawer() {

@@ -81,15 +81,18 @@ public class EventInteract implements Listener {
                     if (item.getType().equals(Material.AIR)) return;
                     player.getInventory().addItem(item);
                     player.updateInventory();
-                    player.sendMessage(Component.text("You get " + amount + " ").append(item.displayName()).append(Component.text(" from the drawer | " + drawer.getQuantity())));
+                    player.sendActionBar(Component.text("You get " + amount + " ").append(item.displayName()).append(Component.text(" from the drawer | " + drawer.getQuantity())));
                     drawer.updateFrame();
-
+                    drawer.putItemInBarrelInv();
 
 
                 }
                 break;
             case RIGHT_CLICK_BLOCK: //Droit poser
                 {
+                    if (event.getItem() != null && (event.getItem().getType().equals(Material.HOPPER) || event.getItem().getType().equals(Material.BARRIER))) {
+                        return;
+                    }
                     event.setCancelled(true);
 
                     poseItem(drawer, player);
@@ -143,14 +146,14 @@ public class EventInteract implements Listener {
                 return;
             }
             if (drawer.getQuantity() <= 0) {
-                player.sendMessage("The drawer is empty");
+                player.sendActionBar(Component.text("Le drawer est vide"));
                 return;
             }
         }
 
         if (!handItem.asOne().equals(drawer.getItem().asOne()) || handItem.getType().equals(Material.AIR)) {
             if (drawer.getQuantity() > 0) {
-                player.sendMessage(Component.text("The drawer contain " + drawer.getQuantity() + " ").append(drawer.getItem().displayName()));
+                player.sendActionBar(Component.text("The drawer contain " + drawer.getQuantity() + " ").append(drawer.getItem().displayName()));
                 return;
             }
         }
@@ -174,12 +177,13 @@ public class EventInteract implements Listener {
         }
 
         drawer.addItem(handItem.asQuantity(amount));
-        player.sendMessage(Component.text("You put " + amount + " ").append(handItem.displayName()).append(Component.text(" from the drawer | " + drawer.getQuantity())));
+        player.sendActionBar(Component.text("You put " + amount + " ").append(handItem.displayName()).append(Component.text(" from the drawer | " + drawer.getQuantity())));
 
         handItem.setAmount(handItem.getAmount() - amount);
         player.getInventory().setItemInMainHand(handItem);
         player.updateInventory();
 
         drawer.updateFrame();
+        drawer.putItemInBarrelInv();
     }
 }

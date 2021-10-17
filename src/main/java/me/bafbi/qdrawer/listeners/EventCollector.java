@@ -1,5 +1,6 @@
 package me.bafbi.qdrawer.listeners;
 
+import io.papermc.paper.event.block.BlockBreakBlockEvent;
 import me.bafbi.qdrawer.Exeptions.NoTileStateException;
 import me.bafbi.qdrawer.Exeptions.NotDrawerException;
 import me.bafbi.qdrawer.Qdrawer;
@@ -125,6 +126,7 @@ public class EventCollector implements Listener {
                     Bukkit.broadcast(Component.text("oui"));
                     drawer.addItem(item.getItemStack());
                     drawer.updateFrame();
+                    drawer.putItemInBarrelInv();
                     items.remove(item);
                 }
             }
@@ -153,6 +155,7 @@ public class EventCollector implements Listener {
                 Bukkit.broadcast(Component.text("oui"));
                 drawer.addItem(item.getItemStack());
                 drawer.updateFrame();
+                drawer.putItemInBarrelInv();
                 return true;
             }
         }
@@ -167,6 +170,14 @@ public class EventCollector implements Listener {
 
     }
 
+    /*@EventHandler
+    public void OnBlockBlockDrop(BlockBreakBlockEvent event) {
+
+        Bukkit.broadcast(Component.text("ahouai"));
+        //putInDrawer(event.getBlock().getChunk(), event.getDrops());
+
+    }*/
+
     @EventHandler
     public void OnEntityDrop(EntityDropItemEvent event) {
 
@@ -178,6 +189,7 @@ public class EventCollector implements Listener {
     public void OnPlayerDrop(PlayerDropItemEvent event) {
 
         event.setCancelled(putInDrawer(event.getItemDrop().getChunk(), event.getItemDrop()));
+        event.getPlayer().getInventory().removeItem(event.getItemDrop().getItemStack());
 
     }
 

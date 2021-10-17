@@ -10,14 +10,18 @@ import me.bafbi.qdrawer.models.upgrade.UpgradeType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Arrays;
 
 public class EventInventory implements Listener {
 
@@ -95,6 +99,47 @@ public class EventInventory implements Listener {
         player.getInventory().addItem(currentUpgrade.getUpgradeItem());
         currentUpgrade.setTier(0);
         event.getInventory().setItem(currentUpgradeSlot, currentUpgrade.getItemStack());
+
+
+    }
+
+    @EventHandler
+    public void OnItemMove(InventoryMoveItemEvent event) {
+
+        if (event.isCancelled()) return;
+
+        Drawer drawer;
+        try {
+            drawer = new Drawer(event.getDestination().getLocation().getBlock());
+        } catch (NoTileStateException | NotDrawerException e) {
+            try {
+                drawer = new Drawer(event.getSource().getLocation().getBlock());
+            } catch (NoTileStateException | NotDrawerException ex) {
+                return;
+            }
+            Drawer finalDrawer = drawer;
+            Arrays.stream(event.getDestination().getContents()).forEach(itemStack -> {
+                if (itemStack != null || (itemStack != null && itemStack.getType() != finalDrawer.getItem().getType())) {
+                    event.setCancelled(true);
+                    return;
+                }
+            });
+            drawer.takeItem(event.getItem().getAmount());
+            drawer.updateFrame();
+            drawer.putItemInBarrelInv();
+            return;
+        }
+
+        if (!drawer.getItem().isSimilar(event.getItem())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        drawer.addItem(event.getItem());
+        drawer.updateFrame();
+        drawer.putItemInBarrelInv();
+        event.setItem(new ItemStack(Material.AIR));
+
 
 
     }
