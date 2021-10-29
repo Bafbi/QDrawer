@@ -7,6 +7,7 @@ import me.bafbi.qdrawer.listeners.EventBlockBreakPlace;
 import me.bafbi.qdrawer.listeners.EventCollector;
 import me.bafbi.qdrawer.listeners.EventInteract;
 import me.bafbi.qdrawer.listeners.EventInventory;
+import me.bafbi.qdrawer.models.recipes.RecipeDrawer;
 import me.bafbi.qdrawer.utils.DataManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -17,10 +18,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,8 +56,8 @@ public final class Qdrawer extends JavaPlugin {
         }*/
 
         getCommand("qd").setExecutor(new CmdQD(this));
-        getCommand("store").setExecutor(new CmdStore(this));
-        getCommand("upgrade").setExecutor(new CmdUpgrade(this));
+        //getCommand("store").setExecutor(new CmdStore(this));
+        //getCommand("upgrade").setExecutor(new CmdUpgrade(this));
 
         PluginManager pluginManager = getServer().getPluginManager();
 
@@ -61,6 +65,9 @@ public final class Qdrawer extends JavaPlugin {
         pluginManager.registerEvents(new EventInteract(this), this);
         pluginManager.registerEvents(new EventInventory(this), this);
         pluginManager.registerEvents(new EventCollector(this), this);
+
+        new RecipeDrawer(this).registerRecipes();
+        new RecipeDrawer(this).registerRecipe();
 
     }
 

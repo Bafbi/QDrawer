@@ -109,14 +109,33 @@ public class EventInventory implements Listener {
         if (event.isCancelled()) return;
 
         Drawer drawer;
+        boolean destination = true;
+
         try {
             drawer = new Drawer(event.getDestination().getLocation().getBlock());
         } catch (NoTileStateException | NotDrawerException e) {
-            try {
-                drawer = new Drawer(event.getSource().getLocation().getBlock());
-            } catch (NoTileStateException | NotDrawerException ex) {
+            destination = false;
+        }
+
+        try {
+            drawer = new Drawer(event.getSource().getLocation().getBlock());
+        } catch (NoTileStateException | NotDrawerException ex) {
+            return;
+        }
+
+        if (destination) {
+
+            if (!drawer.getItem().isSimilar(event.getItem())) {
+                event.setCancelled(true);
                 return;
             }
+
+            drawer.addItem(event.getItem());
+            drawer.updateFrame();
+            drawer.putItemInBarrelInv();
+            event.setItem(new ItemStack(Material.AIR));
+        }
+        else {
             Drawer finalDrawer = drawer;
             Arrays.stream(event.getDestination().getContents()).forEach(itemStack -> {
                 if (itemStack != null || (itemStack != null && itemStack.getType() != finalDrawer.getItem().getType())) {
@@ -127,19 +146,7 @@ public class EventInventory implements Listener {
             drawer.takeItem(event.getItem().getAmount());
             drawer.updateFrame();
             drawer.putItemInBarrelInv();
-            return;
         }
-
-        if (!drawer.getItem().isSimilar(event.getItem())) {
-            event.setCancelled(true);
-            return;
-        }
-
-        drawer.addItem(event.getItem());
-        drawer.updateFrame();
-        drawer.putItemInBarrelInv();
-        event.setItem(new ItemStack(Material.AIR));
-
 
 
     }
