@@ -11,14 +11,12 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class RecipeDrawer {
 
     private Qdrawer main;
+    public static List<NamespacedKey> recipesList = new ArrayList<>();
 
     public RecipeDrawer(Qdrawer qdrawer) {
         this.main = qdrawer;
@@ -26,7 +24,7 @@ public class RecipeDrawer {
 
     public void registerRecipe() {
 
-        main.getLogger().info("what");
+        //main.getLogger().info("what");
 
         // create a NamespacedKey for your recipe
         NamespacedKey key = new NamespacedKey(this.main, "drawertest");
@@ -46,7 +44,7 @@ public class RecipeDrawer {
         Bukkit.addRecipe(recipe);
     }
 
-    public void registerRecipes() {
+    public boolean registerRecipes() {
 
         ConfigurationSection config = this.main.getConfig().getConfigurationSection("craft");
 
@@ -54,14 +52,15 @@ public class RecipeDrawer {
         ShapedRecipe recipe;
 
         for (String string : config.getKeys(false)) {
-            main.getLogger().info(string + " :");
+            //main.getLogger().info(string + " :");
 
             switch (string) {
                 case "drawer":
                     key = new NamespacedKey(this.main, string);
                     recipe = new ShapedRecipe(key, Drawer.getNewDrawerItemStack());
                     Bukkit.addRecipe(setShape(recipe, config.getStringList("drawer")));
-                    main.getLogger().info("register drawer");
+                    recipesList.add(key);
+                    //main.getLogger().info("register drawer");
                     break;
                 case "upgrade":
                     for (String upgradekey : config.getConfigurationSection("upgrade").getKeys(false)) {
@@ -69,12 +68,15 @@ public class RecipeDrawer {
                             key = new NamespacedKey(this.main, upgradekey + "_upgrade_" + tierkey);
                             recipe = new ShapedRecipe(key, new Upgrade(UpgradeType.valueOf(upgradekey.toUpperCase()), Integer.valueOf(tierkey)).getItemStack());
                             Bukkit.addRecipe(setShape(recipe, config.getStringList("upgrade." + upgradekey + "." + tierkey)));
-                            main.getLogger().info("register " + upgradekey + " " + tierkey);
+                            recipesList.add(key);
+                            //main.getLogger().info("register " + upgradekey + " " + tierkey);
                         }
                     }
                     break;
             }
         }
+
+        return true;
 
     }
 

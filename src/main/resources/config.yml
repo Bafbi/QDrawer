@@ -1,3 +1,20 @@
+### Here the config to choose what upgrade are disable or not ###
+storage:
+  enable: true
+collection:
+  enable: true
+autosell:
+  enable: true
+  #in tick
+  time_between_sell: 200
+  #a command with <MATERIAL>, <quantity> and <player> with a custom plugin
+  command: "say <MATERIAL> <quantity> <player>"
+  #if you're using vault
+  price:
+    CACTUS: 1
+
+
+
 drawer:
   gui:
     information: '[{"text":"Menu d\u2032"},{"text":"upgrade","color":"aqua"},{"text":" du "},{"text":"Drawer","color":"gold"}]'
@@ -20,8 +37,6 @@ craft:
     collection:
       1: [ IRON_BARS, IRON_BARS, IRON_BARS, IRON_BARS, CHEST, IRON_BARS, IRON_BARS, IRON_BARS, IRON_BARS ]
       2: [ GOLD_INGOT, GOLD_INGOT, GOLD_INGOT, GOLD_INGOT, CHEST, GOLD_INGOT, GOLD_INGOT, GOLD_INGOT, GOLD_INGOT ]
-      3: [ DIAMOND, DIAMOND, DIAMOND, DIAMOND, CHEST, DIAMOND, DIAMOND, DIAMOND, DIAMOND ]
-      4: [ EMERALD, EMERALD, EMERALD, EMERALD, CHEST, EMERALD, EMERALD, EMERALD, EMERALD ]
 
 
 upgrade:

@@ -64,12 +64,12 @@ public class BlockArrayDataType implements PersistentDataType<byte[], Block[]> {
             List<Block> blockList = new ArrayList<>();
 
             int arrayLength = dataInput.readInt();
-            Bukkit.getLogger().info(String.valueOf(arrayLength));
+            //Bukkit.getLogger().info(String.valueOf(arrayLength));
             for (int i = 0; i < arrayLength; i++) {
                 String worldKeyString = (String) dataInput.readObject();
                 long blockKey = dataInput.readLong();
-                Bukkit.getLogger().info(worldKeyString);
-                Bukkit.getLogger().info(String.valueOf(blockKey));
+                //Bukkit.getLogger().info(worldKeyString);
+                //Bukkit.getLogger().info(String.valueOf(blockKey));
 
                 NamespacedKey worldKey = NamespacedKey.fromString(worldKeyString);
                 blockList.add(i, Bukkit.getWorld(worldKey).getBlockAtKey(blockKey));

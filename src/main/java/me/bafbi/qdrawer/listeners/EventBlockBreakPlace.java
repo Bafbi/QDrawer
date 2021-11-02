@@ -5,9 +5,13 @@ import me.bafbi.qdrawer.Exeptions.NotDrawerException;
 import me.bafbi.qdrawer.Qdrawer;
 import me.bafbi.qdrawer.datatype.ItemStackDataType;
 import me.bafbi.qdrawer.models.Drawer;
+import me.bafbi.qdrawer.models.runnables.Autosell;
 import me.bafbi.qdrawer.models.upgrade.Upgrade;
 import me.bafbi.qdrawer.models.upgrade.UpgradeType;
+import me.bafbi.qdrawer.utils.ChunkManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -27,6 +31,8 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 public class EventBlockBreakPlace implements Listener {
 
@@ -67,7 +73,22 @@ public class EventBlockBreakPlace implements Listener {
             }
         }
 
-        EventCollector.removeDrawer(block);
+        if (drawerUpgrades[2] > 0) {
+            ChunkManager.removeDrawer(block, new NamespacedKey(main, "autosell"), false);
+            if (Autosell.loadDrawer.contains(drawer.getBlockDrawer())) {
+                main.getLogger().info("drawer block removed");
+                Autosell.loadDrawer.remove(drawer.getBlockDrawer());
+            }
+        }
+
+        switch (drawerUpgrades[1]) {
+            case 1 -> {
+                ChunkManager.removeDrawer(block, new NamespacedKey(main, "collection"), false);
+            }
+            case 2 -> {
+                ChunkManager.removeDrawer(block, new NamespacedKey(main, "collection"), true);
+            }
+        }
 
         player.sendMessage("you break a Drawer");
     }
@@ -113,7 +134,12 @@ public class EventBlockBreakPlace implements Listener {
         }
 
         drawer.createFrame();
-        EventCollector.addDrawer(blockDrawer);
+        drawer.setPlayerUUID(player.getUniqueId().toString());
+
+
+        player.sendMessage(Component.text(drawer.getPlayerUUID()));
+        player.sendMessage(Component.text(Bukkit.getPlayer(UUID.fromString(drawer.getPlayerUUID())).getName()));
+
 
         player.sendMessage(Component.text("You place a new Drawer"));
     }

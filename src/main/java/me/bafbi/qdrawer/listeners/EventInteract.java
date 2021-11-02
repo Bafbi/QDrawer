@@ -1,6 +1,5 @@
 package me.bafbi.qdrawer.listeners;
 
-import io.papermc.paper.event.player.PlayerItemCooldownEvent;
 import me.bafbi.qdrawer.Exeptions.NoTileStateException;
 import me.bafbi.qdrawer.Exeptions.NotDrawerException;
 import me.bafbi.qdrawer.Qdrawer;
@@ -79,11 +78,12 @@ public class EventInteract implements Listener {
 
                     ItemStack item = drawer.takeItem(amount);
                     if (item.getType().equals(Material.AIR)) return;
-                    player.getInventory().addItem(item);
+                    ItemStack dintfit = (player.getInventory().addItem(item)).get(0);
+                    if (dintfit != null) player.getWorld().dropItem(player.getLocation(), dintfit);
                     player.updateInventory();
                     player.sendActionBar(Component.text("You get " + amount + " ").append(item.displayName()).append(Component.text(" from the drawer | " + drawer.getQuantity())));
                     drawer.updateFrame();
-                    drawer.putItemInBarrelInv();
+                    drawer.updateItemInBarrelInv();
 
 
                 }
@@ -167,16 +167,14 @@ public class EventInteract implements Listener {
             }
         }
 
-        if (drawer.getQuantity() >= Math.pow(2.0, drawer.getUpgrades()[0] + 5) * 64) {
-            return;
-        }
-
         Integer amount = 1;
         if (player.isSneaking()) {
             amount = handItem.getAmount();
         }
 
-        drawer.addItem(handItem.asQuantity(amount));
+        if (drawer.addItem(handItem.asQuantity(amount))) {
+            return;
+        }
         player.sendActionBar(Component.text("You put " + amount + " ").append(handItem.displayName()).append(Component.text(" from the drawer | " + drawer.getQuantity())));
 
         handItem.setAmount(handItem.getAmount() - amount);
@@ -184,6 +182,6 @@ public class EventInteract implements Listener {
         player.updateInventory();
 
         drawer.updateFrame();
-        drawer.putItemInBarrelInv();
+        drawer.updateItemInBarrelInv();
     }
 }

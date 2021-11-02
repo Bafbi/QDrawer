@@ -1,6 +1,5 @@
 package me.bafbi.qdrawer.listeners;
 
-import io.papermc.paper.event.block.BlockBreakBlockEvent;
 import me.bafbi.qdrawer.Exeptions.NoTileStateException;
 import me.bafbi.qdrawer.Exeptions.NotDrawerException;
 import me.bafbi.qdrawer.Qdrawer;
@@ -14,9 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockDropItemEvent;
-import org.bukkit.event.entity.EntityDropItemEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 
@@ -31,131 +28,29 @@ public class EventCollector implements Listener {
         this.main = qdrawer;
     }
 
-    public static void addDrawer(Block drawerBlock) {
-
-        Chunk chunk = drawerBlock.getChunk();
-        PersistentDataContainer chunkData = chunk.getPersistentDataContainer();
-
-
-        /*if (chunkBlockMap == null || !chunkBlockMap.containsKey(chunk)) {
-            Block[] blockArray = {drawerBlock};
-            chunkBlockMap.put(chunk, blockArray);
-            return;
-        }*/
-
-        if (!chunkData.has(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType())) {
-            Block[] blockArray = {drawerBlock};
-            chunkData.set(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType(), blockArray);
-            return;
-        }
-
-        List<Block> drawersList = new LinkedList<Block>(Arrays.asList(Objects.requireNonNull(chunkData.get(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType()))));
-        drawersList.add(drawerBlock);
-
-        Block[] blocks = {};
-        blocks = (Block[]) drawersList.toArray(blocks);
-
-        /*Qdrawer.getDataStatic().getConfig().set("chunk_blocks_map.", blocks);
-        Qdrawer.getDataStatic().saveConfig();*/
-
-        //chunkBlockMap.put(chunk, blocks);
-
-        chunkData.set(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType(), blocks);
-
-    }
-
-    public static void removeDrawer(Block drawerBlock) {
-
-        Chunk chunk = drawerBlock.getChunk();
-        PersistentDataContainer chunkData = chunk.getPersistentDataContainer();
-
-
-        /*if (chunkBlockMap == null || !chunkBlockMap.containsKey(chunk)) {
-            return;
-        }*/
-
-        if (!chunkData.has(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType())) {
-            return;
-        }
-
-        List<Block> drawersList = new LinkedList<Block>(Arrays.asList(Objects.requireNonNull(chunkData.get(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType()))));
-        drawersList.remove(drawerBlock);
-
-        /*int count = 0;
-        drawersList.forEach(e -> {
-            if (e.equals(drawerBlock)) {
-                drawersList.remove(count);
-            }
-        });*/
-        /*for (Block block : chunkBlockMap.get(chunk)) {
-            if (block.equals(drawerBlock)) continue;
-            drawersList.add(block);
-        }*/
-        Block[] blocks = {};
-        blocks = (Block[]) drawersList.toArray(blocks);
-
-        /*Qdrawer.getDataStatic().getConfig().set("chunk_blocks_map.", blocks);
-        Qdrawer.getDataStatic().saveConfig();*/
-
-        //chunkBlockMap.put(chunk, blocks);
-
-        chunkData.set(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType(), blocks);
-
-    }
-
-    private void putInDrawer(Chunk chunk, List<Item> items) {
-
-        Bukkit.broadcast(Component.text("drop"));
-
-        PersistentDataContainer chunkData = chunk.getPersistentDataContainer();
-
-        if (!chunkData.has(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType())) {
-            return;
-        }
-
-        for (Block drawerBlock : Objects.requireNonNull(chunkData.get(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType()))) {
-            Drawer drawer;
-            try {
-                drawer = new Drawer(drawerBlock);
-            } catch (NotDrawerException | NoTileStateException e) {
-                return;
-            }
-
-            for (Item item : List.copyOf(items)) {
-                if (drawer.getItem().isSimilar(item.getItemStack())) {
-                    Bukkit.broadcast(Component.text("oui"));
-                    drawer.addItem(item.getItemStack());
-                    drawer.updateFrame();
-                    drawer.putItemInBarrelInv();
-                    items.remove(item);
-                }
-            }
-        }
-    }
-
     private boolean putInDrawer(Chunk chunk, Item item) {
 
-        Bukkit.broadcast(Component.text("drop"));
+        //Bukkit.broadcast(Component.text("drop"));
 
         PersistentDataContainer chunkData = chunk.getPersistentDataContainer();
 
-        if (!chunkData.has(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType())) {
+        if (!chunkData.has(new NamespacedKey(main, "collection"), new BlockArrayDataType())) {
             return false;
         }
 
-        for (Block drawerBlock : Objects.requireNonNull(chunkData.get(new NamespacedKey(Qdrawer.getPlugin(Qdrawer.class), "drawers"), new BlockArrayDataType()))) {
+        for (Block drawerBlock : Objects.requireNonNull(chunkData.get(new NamespacedKey(main, "collection"), new BlockArrayDataType()))) {
             Drawer drawer;
             try {
                 drawer = new Drawer(drawerBlock);
             } catch (NotDrawerException | NoTileStateException e) {
-                return false;
+                continue;
             }
 
             if (drawer.getItem().isSimilar(item.getItemStack())) {
-                Bukkit.broadcast(Component.text("oui"));
-                drawer.addItem(item.getItemStack());
+                //Bukkit.broadcast(Component.text("oui"));
+                if (!drawer.addItem(item.getItemStack())) continue;
                 drawer.updateFrame();
-                drawer.putItemInBarrelInv();
+                drawer.updateItemInBarrelInv();
                 return true;
             }
         }
@@ -163,33 +58,43 @@ public class EventCollector implements Listener {
     }
 
 
-    @EventHandler
+    /*@EventHandler
     public void OnBlockDrop(BlockDropItemEvent event) {
 
         putInDrawer(event.getBlock().getChunk(), event.getItems());
 
     }
 
-    /*@EventHandler
+    @EventHandler
     public void OnBlockBlockDrop(BlockBreakBlockEvent event) {
 
         Bukkit.broadcast(Component.text("ahouai"));
         //putInDrawer(event.getBlock().getChunk(), event.getDrops());
 
-    }*/
+    }
 
     @EventHandler
-    public void OnEntityDrop(EntityDropItemEvent event) {
+    public void OnEntityDrop(EntityDeathEvent event) {
 
-        event.setCancelled(putInDrawer(event.getItemDrop().getChunk(), event.getItemDrop()));
+        putInDrawerBis(event.getEntity().getChunk(), event.getDrops());
 
     }
 
     @EventHandler
     public void OnPlayerDrop(PlayerDropItemEvent event) {
 
-        event.setCancelled(putInDrawer(event.getItemDrop().getChunk(), event.getItemDrop()));
-        event.getPlayer().getInventory().removeItem(event.getItemDrop().getItemStack());
+        if (putInDrawer(event.getItemDrop().getChunk(), event.getItemDrop())) {
+            event.getItemDrop().remove();
+        }
+
+    }*/
+
+    @EventHandler
+    public void OnItemSpawn(ItemSpawnEvent event) {
+
+        if (putInDrawer(event.getLocation().getChunk(), event.getEntity())) {
+            event.getEntity().remove();
+        }
 
     }
 

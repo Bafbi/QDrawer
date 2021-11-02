@@ -5,8 +5,9 @@ import me.bafbi.qdrawer.Exeptions.NotDrawerException;
 import me.bafbi.qdrawer.Exeptions.NotUpgradeException;
 import me.bafbi.qdrawer.Qdrawer;
 import me.bafbi.qdrawer.models.Drawer;
+import me.bafbi.qdrawer.models.runnables.Autosell;
 import me.bafbi.qdrawer.models.upgrade.Upgrade;
-import me.bafbi.qdrawer.models.upgrade.UpgradeType;
+import me.bafbi.qdrawer.utils.ChunkManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -18,10 +19,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EventInventory implements Listener {
 
@@ -34,9 +35,15 @@ public class EventInventory implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent event) {
 
-        if (!event.getView().title().equals(Component.text("Drawer Upgrade").color(NamedTextColor.GOLD))) {
+        /*if (!event.getView().title().equals(Component.text("Drawer Upgrade").color(NamedTextColor.GOLD))) {
+            return;
+        }*/
+        if (event.getInventory().getItem(3) == null) return;
+        if (!event.getInventory().getItem(3).getItemMeta().getPersistentDataContainer().has(new NamespacedKey(main, "drawer_id"), PersistentDataType.STRING)) {
             return;
         }
+
+        if (event.getCurrentItem() == null) return;
         if (event.getSlot() == 3 && event.getClickedInventory().equals(event.getView().getTopInventory())) {
             event.getWhoClicked().sendMessage("aa");
             event.setCancelled(true);
@@ -60,7 +67,7 @@ public class EventInventory implements Listener {
 
         Upgrade clickedUpgrade;
         Upgrade currentUpgrade;
-        Integer currentUpgradeSlot;
+        int currentUpgradeSlot;
 
         try {
             clickedUpgrade = new Upgrade(item);
@@ -81,6 +88,30 @@ public class EventInventory implements Listener {
             upgrades[currentUpgradeSlot] = clickedUpgrade.getTier();
             drawer.setUpgrades(upgrades);
 
+            switch (currentUpgradeSlot) {
+                case 1 -> {
+                    switch (clickedUpgrade.getTier()) {
+                        case 1 -> {
+                            //ChunkManager.removeDrawer(drawer.getBlockDrawer(), new NamespacedKey(main, "collection"), false);
+                            ChunkManager.addDrawer(drawer.getBlockDrawer(), new NamespacedKey(main, "collection"), false);
+                        }
+                        case 2 -> {
+                            //ChunkManager.removeDrawer(drawer.getBlockDrawer(), new NamespacedKey(main, "collection"), true);
+                            ChunkManager.addDrawer(drawer.getBlockDrawer(), new NamespacedKey(main, "collection"), true);
+                        }
+                    }
+                }
+                case 2 -> {
+                    //ChunkManager.removeDrawer(drawer.getBlockDrawer(), new NamespacedKey(main, "autosell"), false);
+                    ChunkManager.addDrawer(drawer.getBlockDrawer(), new NamespacedKey(main, "autosell"), false);
+                    if (!Autosell.loadDrawer.contains(drawer.getBlockDrawer())) {
+                        main.getLogger().info("drawer block added");
+                        Autosell.loadDrawer.add(drawer.getBlockDrawer());
+                    }
+                }
+
+            }
+
             if (currentUpgrade.getTier() >= 1) {
                 player.getInventory().addItem(currentUpgrade.getUpgradeItem());
             }
@@ -95,6 +126,22 @@ public class EventInventory implements Listener {
         int[] upgrades = drawer.getUpgrades();
         upgrades[currentUpgradeSlot] = 0;
         drawer.setUpgrades(upgrades);
+        switch (currentUpgradeSlot) {
+            case 1 -> {
+                switch (currentUpgrade.getTier()) {
+                    case 1 -> ChunkManager.removeDrawer(drawer.getBlockDrawer(), new NamespacedKey(main, "collection"), false);
+                    case 2 -> ChunkManager.removeDrawer(drawer.getBlockDrawer(), new NamespacedKey(main, "collection"), true);
+                }
+            }
+            case 2 -> {
+                ChunkManager.removeDrawer(drawer.getBlockDrawer(), new NamespacedKey(main, "autosell"), false);
+                if (Autosell.loadDrawer.contains(drawer.getBlockDrawer())) {
+                    main.getLogger().info("drawer block removed");
+                    Autosell.loadDrawer.remove(drawer.getBlockDrawer());
+                }
+            }
+
+        }
 
         player.getInventory().addItem(currentUpgrade.getUpgradeItem());
         currentUpgrade.setTier(0);
@@ -115,12 +162,12 @@ public class EventInventory implements Listener {
             drawer = new Drawer(event.getDestination().getLocation().getBlock());
         } catch (NoTileStateException | NotDrawerException e) {
             destination = false;
-        }
 
-        try {
-            drawer = new Drawer(event.getSource().getLocation().getBlock());
-        } catch (NoTileStateException | NotDrawerException ex) {
-            return;
+            try {
+                drawer = new Drawer(event.getSource().getLocation().getBlock());
+            } catch (NoTileStateException | NotDrawerException ex) {
+                return;
+            }
         }
 
         if (destination) {
@@ -129,23 +176,28 @@ public class EventInventory implements Listener {
                 event.setCancelled(true);
                 return;
             }
+            if (!drawer.addItem(event.getItem())) {
+                event.setCancelled(true);
+                return;
+            }
 
-            drawer.addItem(event.getItem());
             drawer.updateFrame();
-            drawer.putItemInBarrelInv();
+            drawer.updateItemInBarrelInv();
             event.setItem(new ItemStack(Material.AIR));
         }
         else {
             Drawer finalDrawer = drawer;
+            AtomicBoolean good = new AtomicBoolean(true);
             Arrays.stream(event.getDestination().getContents()).forEach(itemStack -> {
-                if (itemStack != null || (itemStack != null && itemStack.getType() != finalDrawer.getItem().getType())) {
+                if (itemStack != null && !itemStack.isSimilar(finalDrawer.getItem())) {
                     event.setCancelled(true);
-                    return;
+                    good.set(false);
                 }
             });
+            if (!good.get()) return;
             drawer.takeItem(event.getItem().getAmount());
             drawer.updateFrame();
-            drawer.putItemInBarrelInv();
+            drawer.updateItemInBarrelInv();
         }
 
 
