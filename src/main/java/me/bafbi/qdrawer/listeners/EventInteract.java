@@ -98,6 +98,8 @@ public class EventInteract implements Listener {
                     poseItem(drawer, player);
 
                 }
+        default:
+            break;
         }
 
 

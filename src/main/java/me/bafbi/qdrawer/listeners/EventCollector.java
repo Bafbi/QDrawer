@@ -1,12 +1,7 @@
 package me.bafbi.qdrawer.listeners;
 
-import me.bafbi.qdrawer.Exeptions.NoTileStateException;
-import me.bafbi.qdrawer.Exeptions.NotDrawerException;
-import me.bafbi.qdrawer.Qdrawer;
-import me.bafbi.qdrawer.datatype.BlockArrayDataType;
-import me.bafbi.qdrawer.models.Drawer;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
+import java.util.Objects;
+
 import org.bukkit.Chunk;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -14,10 +9,13 @@ import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 
-import java.util.*;
+import me.bafbi.qdrawer.Qdrawer;
+import me.bafbi.qdrawer.Exeptions.NoTileStateException;
+import me.bafbi.qdrawer.Exeptions.NotDrawerException;
+import me.bafbi.qdrawer.datatype.BlockArrayDataType;
+import me.bafbi.qdrawer.models.Drawer;
 
 public class EventCollector implements Listener {
 

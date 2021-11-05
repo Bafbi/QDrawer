@@ -9,8 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.plugin.Plugin;
-
 import java.util.*;
 
 public class RecipeDrawer {

@@ -1,0 +1,17 @@
+name: QDrawer
+version: '${project.version}'
+main: me.bafbi.qdrawer.Qdrawer
+api-version: 1.16
+authors: [ Bafbi ]
+description: Un plugin qui rajoute de cool drawer
+
+softdepend:
+  - "Vault"
+
+commands:
+  qd:
+    description: donne un drawer
+  store:
+    description: donne un drawer
+  upgrade:
+    description: donne un drawer
