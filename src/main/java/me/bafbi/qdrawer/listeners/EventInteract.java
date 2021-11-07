@@ -12,6 +12,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -29,7 +30,7 @@ public class EventInteract implements Listener {
         this.main = qdrawer;
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent event) {
 
         if (!event.hasBlock()) {
@@ -90,7 +91,7 @@ public class EventInteract implements Listener {
                 break;
             case RIGHT_CLICK_BLOCK: //Droit poser
                 {
-                    if (event.getItem() != null && (event.getItem().getType().equals(Material.HOPPER) || event.getItem().getType().equals(Material.BARRIER))) {
+                    if (event.getItem() != null && ((player.isSneaking() && event.getItem().getType().equals(Material.HOPPER)) || event.getItem().getType().equals(Material.BARRIER))) {
                         return;
                     }
                     event.setCancelled(true);
@@ -174,7 +175,7 @@ public class EventInteract implements Listener {
             amount = handItem.getAmount();
         }
 
-        if (drawer.addItem(handItem.asQuantity(amount))) {
+        if (!drawer.addItem(handItem.asQuantity(amount))) {
             return;
         }
         player.sendActionBar(Component.text("You put " + amount + " ").append(handItem.displayName()).append(Component.text(" from the drawer | " + drawer.getQuantity())));
@@ -182,7 +183,6 @@ public class EventInteract implements Listener {
         handItem.setAmount(handItem.getAmount() - amount);
         player.getInventory().setItemInMainHand(handItem);
         player.updateInventory();
-
         drawer.updateFrame();
         drawer.updateItemInBarrelInv();
     }

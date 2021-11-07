@@ -1,7 +1,10 @@
 package me.bafbi.qdrawer;
 
-import java.util.Objects;
-
+import me.bafbi.qdrawer.commands.CmdQD;
+import me.bafbi.qdrawer.datatype.BlockArrayDataType;
+import me.bafbi.qdrawer.listeners.*;
+import me.bafbi.qdrawer.models.recipes.RecipeDrawer;
+import me.bafbi.qdrawer.models.runnables.Autosell;
 import org.bukkit.Chunk;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -10,15 +13,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.bafbi.qdrawer.commands.CmdQD;
-import me.bafbi.qdrawer.datatype.BlockArrayDataType;
-import me.bafbi.qdrawer.listeners.EventBlockBreakPlace;
-import me.bafbi.qdrawer.listeners.EventChunk;
-import me.bafbi.qdrawer.listeners.EventCollector;
-import me.bafbi.qdrawer.listeners.EventInteract;
-import me.bafbi.qdrawer.listeners.EventInventory;
-import me.bafbi.qdrawer.models.recipes.RecipeDrawer;
-import me.bafbi.qdrawer.models.runnables.Autosell;
+import java.util.Objects;
 
 public final class Qdrawer extends JavaPlugin {
 
@@ -32,7 +27,7 @@ public final class Qdrawer extends JavaPlugin {
 
         initAutosell();
 
-        getCommand("qd").setExecutor(new CmdQD(this));
+        Objects.requireNonNull(getCommand("qd")).setExecutor(new CmdQD(this));
         //getCommand("store").setExecutor(new CmdStore(this));
         //getCommand("upgrade").setExecutor(new CmdUpgrade(this));
 

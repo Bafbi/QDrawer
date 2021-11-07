@@ -10,6 +10,7 @@ import org.bukkit.block.TileState;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -36,8 +37,10 @@ public class EventBlockBreakPlace implements Listener {
         this.main = qdrawer;
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onBreak(BlockBreakEvent event) {
+
+        if (event.isCancelled()) return;
 
         Player player = event.getPlayer();
         Block block = event.getBlock();
@@ -89,6 +92,8 @@ public class EventBlockBreakPlace implements Listener {
 
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
+
+        if (event.isCancelled()) return;
 
         Player player = event.getPlayer();
 

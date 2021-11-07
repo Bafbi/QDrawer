@@ -44,6 +44,10 @@ public class RecipeDrawer {
 
     public boolean registerRecipes() {
 
+        if (Bukkit.getRecipe(new NamespacedKey(main, "drawer")) != null) {
+            return true;
+        }
+
         ConfigurationSection config = this.main.getConfig().getConfigurationSection("craft");
 
         NamespacedKey key;
