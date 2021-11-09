@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Container;
 import org.bukkit.block.TileState;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.EntityType;
@@ -38,6 +39,7 @@ public class Drawer {
     private final NamespacedKey quantityKey = new NamespacedKey(main, "quantity");
     private final NamespacedKey frameUUIDKey = new NamespacedKey(main, "frameUUID");
     private final NamespacedKey upgradesKey = new NamespacedKey(main, "upgrades");
+    private final NamespacedKey playerUUIDkey = new NamespacedKey(main, "playerUUID");
 
     private final Block blockDrawer;
     private TileState tileStateDrawer;
@@ -47,6 +49,7 @@ public class Drawer {
     private Integer quantity;
     private String frameUUID;
     private int @NotNull [] upgrades;
+    private String playerUUID;
 
     public Drawer(@NotNull Block blockDrawer) throws NoTileStateException, NotDrawerException {
 
@@ -83,6 +86,7 @@ public class Drawer {
         this.quantity = this.data.getOrDefault(quantityKey, PersistentDataType.INTEGER, 0);
         this.frameUUID = this.data.get(frameUUIDKey, PersistentDataType.STRING);
         this.upgrades = this.data.getOrDefault(upgradesKey, PersistentDataType.INTEGER_ARRAY, new int[]{0, 0, 0});
+        this.playerUUID = this.data.get(playerUUIDkey, PersistentDataType.STRING);
 
     }
 
@@ -115,6 +119,16 @@ public class Drawer {
         this.tileStateDrawer.update();
     }
 
+    public String getPlayerUUID() {
+        return playerUUID;
+    }
+
+    public void setPlayerUUID(String playerUUID) {
+        this.playerUUID = playerUUID;
+        this.data.set(playerUUIDkey, PersistentDataType.STRING, playerUUID);
+        this.tileStateDrawer.update();
+    }
+
     public ItemStack takeItem(Integer quantity) {
         ItemStack item = this.item.asQuantity(quantity);
         this.setQuantity(this.getQuantity() - quantity);
@@ -122,9 +136,12 @@ public class Drawer {
         return item;
     }
 
-    public void addItem(ItemStack item) {
+    public boolean addItem(ItemStack item) {
+        int newQty = this.getQuantity() + item.getAmount();
+        if (newQty >= Math.pow(2.0, upgrades[0] + 5) * 64) return false;
         this.setItem(item.asOne());
-        this.setQuantity(this.getQuantity() + item.getAmount());
+        this.setQuantity(newQty);
+        return true;
     }
 
     public int[] getUpgrades() {
@@ -140,7 +157,7 @@ public class Drawer {
 
     public ItemStack getDisplayItemStack() {
 
-        ItemStack displayItem = this.item;
+        ItemStack displayItem = this.item.clone();
 
         if (displayItem.getType().equals(Material.AIR)) {
             displayItem.setType(Material.BARRIER);
@@ -179,7 +196,10 @@ public class Drawer {
 
         ItemFrame frame = (ItemFrame) this.tileStateDrawer.getWorld().getEntity(UUID.fromString(this.frameUUID));
 
-        assert frame != null;
+        if (frame == null) {
+            createFrame();
+            frame = (ItemFrame) this.tileStateDrawer.getWorld().getEntity(UUID.fromString(this.frameUUID));
+        }
         frame.setItem(this.getDisplayItemStack());
 
     }
@@ -220,7 +240,7 @@ public class Drawer {
 
     public Inventory getGui() {
 
-        Inventory drawerGui = Bukkit.createInventory(null, InventoryType.BREWING, Component.text("Drawer Upgrade").color(NamedTextColor.GOLD));
+        Inventory drawerGui = Bukkit.createInventory(null, InventoryType.BREWING, Component.text("Drawer Upgrade | " + Bukkit.getOfflinePlayer(UUID.fromString(this.playerUUID)).getName()).color(NamedTextColor.GOLD));
 
         drawerGui.setItem(0, new Upgrade(UpgradeType.STORAGE, this.upgrades[0]).getItemStack());
         drawerGui.setItem(1, new Upgrade(UpgradeType.COLLECTION, this.upgrades[1]).getItemStack());
@@ -239,7 +259,14 @@ public class Drawer {
 
     }
 
+    public void updateItemInBarrelInv() {
+        Inventory drawerInv = ((Container) this.blockDrawer.getState()).getInventory();
+        drawerInv.clear();
+        drawerInv.addItem(this.item.asQuantity(this.quantity < 864 ? this.quantity : 864));
+    }
+
     public Block getBlockDrawer() {
         return blockDrawer;
     }
+
 }

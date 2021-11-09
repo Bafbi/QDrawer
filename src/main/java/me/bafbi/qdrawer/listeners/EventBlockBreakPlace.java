@@ -1,24 +1,16 @@
 package me.bafbi.qdrawer.listeners;
 
-import me.bafbi.qdrawer.Exeptions.NoTileStateException;
-import me.bafbi.qdrawer.Exeptions.NotDrawerException;
-import me.bafbi.qdrawer.Qdrawer;
-import me.bafbi.qdrawer.datatype.ItemStackDataType;
-import me.bafbi.qdrawer.models.Drawer;
-import me.bafbi.qdrawer.models.upgrade.Upgrade;
-import me.bafbi.qdrawer.models.upgrade.UpgradeType;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Material;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.TileState;
-import org.bukkit.block.data.Directional;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -26,7 +18,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Objects;
+import me.bafbi.qdrawer.Qdrawer;
+import me.bafbi.qdrawer.Exeptions.NoTileStateException;
+import me.bafbi.qdrawer.Exeptions.NotDrawerException;
+import me.bafbi.qdrawer.datatype.ItemStackDataType;
+import me.bafbi.qdrawer.models.Drawer;
+import me.bafbi.qdrawer.models.runnables.Autosell;
+import me.bafbi.qdrawer.models.upgrade.Upgrade;
+import me.bafbi.qdrawer.models.upgrade.UpgradeType;
+import me.bafbi.qdrawer.utils.ChunkManager;
+import net.kyori.adventure.text.Component;
 
 public class EventBlockBreakPlace implements Listener {
 
@@ -36,8 +37,10 @@ public class EventBlockBreakPlace implements Listener {
         this.main = qdrawer;
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onBreak(BlockBreakEvent event) {
+
+        if (event.isCancelled()) return;
 
         Player player = event.getPlayer();
         Block block = event.getBlock();
@@ -67,13 +70,30 @@ public class EventBlockBreakPlace implements Listener {
             }
         }
 
-        EventCollector.removeDrawer(block);
+        if (drawerUpgrades[2] > 0) {
+            ChunkManager.removeDrawer(block, new NamespacedKey(main, "autosell"), false);
+            if (Autosell.loadDrawer.contains(drawer.getBlockDrawer())) {
+                main.getLogger().info("drawer block removed");
+                Autosell.loadDrawer.remove(drawer.getBlockDrawer());
+            }
+        }
+
+        switch (drawerUpgrades[1]) {
+            case 1 -> {
+                ChunkManager.removeDrawer(block, new NamespacedKey(main, "collection"), false);
+            }
+            case 2 -> {
+                ChunkManager.removeDrawer(block, new NamespacedKey(main, "collection"), true);
+            }
+        }
 
         player.sendMessage("you break a Drawer");
     }
 
     @EventHandler
     public void onPlace(BlockPlaceEvent event) {
+
+        if (event.isCancelled()) return;
 
         Player player = event.getPlayer();
 
@@ -113,7 +133,12 @@ public class EventBlockBreakPlace implements Listener {
         }
 
         drawer.createFrame();
-        EventCollector.addDrawer(blockDrawer);
+        drawer.setPlayerUUID(player.getUniqueId().toString());
+
+
+        player.sendMessage(Component.text(drawer.getPlayerUUID()));
+        player.sendMessage(Component.text(Bukkit.getPlayer(UUID.fromString(drawer.getPlayerUUID())).getName()));
+
 
         player.sendMessage(Component.text("You place a new Drawer"));
     }
